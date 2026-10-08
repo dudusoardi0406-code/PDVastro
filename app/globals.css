@@ -1,26 +1,26 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "../styles/totem.css";
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-lilita: var(--font-lilita), var(--font-archivo), sans-serif;
+  --font-dirt: var(--font-dirt), var(--font-archivo), sans-serif;
+  --font-anton: var(--font-anton), var(--font-archivo), sans-serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* painel admin */
+  --color-canvas: #f5f4f0;
+  --color-panel: #ffffff;
+  --color-line: #e4e1d8;
+  --color-ink: #1c1b18;
+  --color-muted: #6b675e;
+  --color-brand: #127a38;
+  --color-brand-ink: #0b4f27;
+  --color-warn: #b45309;
+  --color-danger: #b91c1c;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
 }
