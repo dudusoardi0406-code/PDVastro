@@ -4,6 +4,7 @@ import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react"
 import { resolveTheme, themeVars } from "@/lib/themes";
 import type { TicketData } from "@/lib/types";
 import { api, ApiError, type Charge, type Heartbeat, type MenuCategory, type OrderStatusView } from "../_lib/api";
+import { DemoBadge } from "./demo-badge";
 import { PrintTicket } from "./print-ticket";
 import {
   CartScreen,
@@ -66,7 +67,29 @@ export function TotemApp() {
   const handledJobs = useRef(new Set<string>());
   const printQueue = useRef<TicketData[]>([]);
   const printBusy = useRef(false);
+  const version = useRef<string | null>(null);
   const eventId = hb?.event?.id ?? null;
+
+  // tela sempre acesa (Wake Lock); o Chrome solta a trava quando a aba some
+  useEffect(() => {
+    let lock: WakeLockSentinel | null = null;
+    const acquire = async () => {
+      try {
+        lock = (await navigator.wakeLock?.request("screen")) ?? null;
+      } catch {
+        // sem suporte ou sem permissão: segue sem a trava
+      }
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void acquire();
+    };
+    void acquire();
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      void lock?.release();
+    };
+  }, []);
 
   // ---------------------------------------------------------------- ações
   const reset = useCallback(() => {
@@ -197,6 +220,19 @@ export function TotemApp() {
 
   // ---------------------------------------------------------------- heartbeat
   const onHeartbeat = useEffectEvent((data: Heartbeat) => {
+    // deploy novo: recarrega quando o totem está parado (sem cliente e sem ficha na fila)
+    if (version.current === null) {
+      version.current = data.version;
+    } else if (
+      data.version !== version.current &&
+      screen.name === "idle" &&
+      !printBusy.current &&
+      printQueue.current.length === 0
+    ) {
+      window.location.reload();
+      return;
+    }
+
     setClockOffset(Date.parse(data.serverTime) - Date.now());
     setConnection("ready");
     setHb(data);
@@ -497,6 +533,8 @@ export function TotemApp() {
             </span>
           </Overlay>
         )}
+
+        <DemoBadge />
 
         {toast && (
           <div

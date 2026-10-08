@@ -9,6 +9,7 @@ import { ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/types";
 import { eventAndDate, param } from "../_lib/filters";
 import { EventDayFilter } from "../_components/event-day-filter";
 import { OrderStatusBadge } from "../_components/status-badges";
+import { AutoRefresh } from "../../_components/auto-refresh";
 import { buttonClass, EmptyState, Field, inputClass, PageHeader, PageSkeleton, Table } from "../../_components/ui";
 
 export const metadata: Metadata = { title: "Pedidos" };
@@ -54,7 +55,11 @@ async function Orders({ searchParams }: { searchParams: PageProps<"/admin/pedido
 
   return (
     <>
-      <PageHeader title="Pedidos" description={`${event.name} · ${formatIsoDate(date)} · ${total} pedido(s)`} />
+      <PageHeader
+        title="Pedidos"
+        description={`${event.name} · ${formatIsoDate(date)} · ${total} pedido(s)`}
+        actions={<AutoRefresh seconds={15} />}
+      />
 
       <EventDayFilter action="/admin/pedidos" events={events} eventId={event.id} date={date}>
         <Field label="Status">

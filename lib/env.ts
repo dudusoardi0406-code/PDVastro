@@ -29,6 +29,11 @@ export function pixProviderName(): PixProviderName {
   return process.env.PIX_PROVIDER === "itau" ? "itau" : "mock";
 }
 
+/** Identifica o deploy atual; o totem recarrega sozinho quando muda. */
+export function appVersion(): string {
+  return process.env.VERCEL_DEPLOYMENT_ID ?? process.env.VERCEL_GIT_COMMIT_SHA ?? "local";
+}
+
 export function appUrl(): string {
   const explicit = process.env.APP_URL;
   if (explicit) return explicit.replace(/\/$/, "");

@@ -6,6 +6,7 @@ import { businessDate, formatDateTime, formatIsoDate } from "@/lib/business-day"
 import { formatBRL } from "@/lib/money";
 import { requireAdmin } from "@/lib/supabase/auth";
 import { PRESETS } from "@/lib/themes";
+import { AutoRefresh } from "../_components/auto-refresh";
 import { Badge, buttonClass, Card, EmptyState, Notice, PageHeader, PageSkeleton, Stat, TextLink } from "../_components/ui";
 
 export const metadata: Metadata = { title: "Visão geral" };
@@ -31,9 +32,12 @@ async function Dashboard() {
         title="Visão geral"
         description={`Dia operacional ${formatIsoDate(today)} (vira às 06:00).`}
         actions={
-          <Link href="/totem" target="_blank" className={buttonClass.secondary}>
-            Abrir totem
-          </Link>
+          <div className="flex items-center gap-3">
+            <AutoRefresh seconds={20} />
+            <Link href="/totem" target="_blank" className={buttonClass.secondary}>
+              Abrir totem
+            </Link>
+          </div>
         }
       />
 

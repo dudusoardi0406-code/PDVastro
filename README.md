@@ -11,6 +11,7 @@ Escopo e decisões: [pdv-eventos-escopo.md](pdv-eventos-escopo.md).
 | Rota | O que é |
 |---|---|
 | `/totem` | Tela do cliente (abrir no totem em modo quiosque) |
+| `/totem/demo?tema=pagode` ou `?tema=underground` | Demonstração sem banco e sem Pix real, para ver o visual ou mostrar ao cliente |
 | `/admin` | Painel: eventos e tema, cardápio, totens, pedidos, relatórios, Pix |
 | `/api/totem/*` | API do totem (exige o cookie de pareamento) |
 | `/api/webhooks/pix/{segredo}` | Webhook Pix |
@@ -65,7 +66,13 @@ Teste completo com `PIX_PROVIDER=mock`:
 4. Monte um pedido › *Pagar com Pix* › **Simular pagamento (teste)** › a senha aparece e a ficha vai para a impressão.
 5. Para testar *valor divergente*: em **Pix** › *Simular pagamento*, informe o txid (detalhe do pedido) e um valor diferente.
 
-Outros comandos: `npm run lint`, `npm run typecheck`, `npm run build`.
+Sem o Supabase configurado, dá para ver o totem em `/totem/demo`, com cardápio de exemplo e Pix simulado. Nada é salvo.
+
+Outros comandos:
+- `npm test`: funções puras e banco. As migrações rodam num Postgres embutido (PGlite), sem precisar do Supabase.
+- `npm run lint`, `npm run typecheck`, `npm run build`.
+
+O GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)) roda lint, tipos, testes e build a cada push.
 
 ## 4. Totem Windows (quiosque + impressão silenciosa)
 
@@ -83,6 +90,9 @@ Comportamento:
 - **Sem internet, o totem fica "fora do ar"** e não aceita pedidos.
 - Se o cliente já tinha pagado, a ficha sai quando a conexão voltar.
 - Reimpressões feitas pelo painel saem no totem em até 5 segundos.
+- **Depois de um deploy novo**, o totem recarrega sozinho na próxima vez que ficar parado na tela inicial.
+- **A tela fica sempre acesa** (Wake Lock). Mesmo assim, desative a suspensão e o protetor de tela do Windows.
+- **Se der erro na tela**, ele mostra "Reiniciando o totem…" e recarrega em 5 segundos.
 
 ## 5. Pix Itaú
 

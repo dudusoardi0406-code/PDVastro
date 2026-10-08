@@ -31,6 +31,9 @@ export type AdminCheck = { status: "ok"; admin: AdminUser } | { status: "anon" }
 
 /** Quem está logado e se está na tabela admins. */
 export async function checkAdmin(): Promise<AdminCheck> {
+  // lê os cookies antes de tudo: marca a página como dinâmica mesmo quando o
+  // build roda sem as variáveis do Supabase (senão o Next "congela" o redirect)
+  await cookies();
   if (!isSupabaseConfigured()) return { status: "anon" };
   const supabase = await authClient();
   const { data } = await supabase.auth.getClaims();

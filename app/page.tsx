@@ -26,6 +26,19 @@ export default function Home() {
           </Link>
         </div>
 
+        <div className="mt-3 rounded-xl border border-line bg-panel p-4">
+          <div className="font-semibold">Demonstração do totem</div>
+          <div className="text-sm text-muted">Sem banco e sem Pix de verdade, para ver o visual ou mostrar ao cliente.</div>
+          <div className="mt-3 flex gap-2">
+            <Link href="/totem/demo?tema=pagode" className="rounded-lg bg-[#0B4F27] px-3 py-1.5 text-sm font-semibold text-[#FFD21F]">
+              Tema Pagode
+            </Link>
+            <Link href="/totem/demo?tema=underground" className="rounded-lg bg-[#0D0A0A] px-3 py-1.5 text-sm font-semibold text-[#F1ECE2]">
+              Tema Underground
+            </Link>
+          </div>
+        </div>
+
         <Suspense fallback={null}>
           <SetupStatus />
         </Suspense>

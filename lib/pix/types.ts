@@ -38,12 +38,12 @@ export interface PixProvider {
 }
 
 export class PixProviderError extends Error {
-  constructor(
-    message: string,
-    readonly status?: number,
-  ) {
+  readonly status?: number;
+
+  constructor(message: string, status?: number) {
     super(message);
     this.name = "PixProviderError";
+    this.status = status;
   }
 }
 

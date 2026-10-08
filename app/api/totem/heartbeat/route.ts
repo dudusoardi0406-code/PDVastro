@@ -1,5 +1,5 @@
-import { after, type NextRequest } from "next/server";
-import { isSupabaseConfigured, pixProviderName } from "@/lib/env";
+import { after, connection, type NextRequest } from "next/server";
+import { appVersion, isSupabaseConfigured, pixProviderName } from "@/lib/env";
 import { json, jsonError } from "@/lib/http";
 import { db, must } from "@/lib/supabase/service";
 import { resolveTheme } from "@/lib/themes";
@@ -10,6 +10,7 @@ import type { EventRow } from "@/lib/types";
 // Chamado pelo totem a cada 5 s: confirma conexão, entrega tema/evento atual
 // e as fichas pendentes de impressão.
 export async function GET(req: NextRequest) {
+  await connection();
   if (!isSupabaseConfigured()) {
     return jsonError("SUPABASE_NAO_CONFIGURADO", "Banco de dados não configurado.", 503);
   }
@@ -41,5 +42,6 @@ export async function GET(req: NextRequest) {
         : null,
     tickets,
     mockPix: pixProviderName() === "mock",
+    version: appVersion(),
   });
 }

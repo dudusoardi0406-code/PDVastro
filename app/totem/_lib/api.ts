@@ -2,6 +2,7 @@
 
 import type { ResolvedTheme } from "@/lib/themes";
 import type { OrderStatus, PaymentStatus, TicketData } from "@/lib/types";
+import { demoApi, isDemo } from "./demo";
 
 export interface TotemEvent {
   id: string;
@@ -16,6 +17,8 @@ export interface Heartbeat {
   event: TotemEvent | null;
   tickets: TicketData[];
   mockPix: boolean;
+  /** muda a cada deploy */
+  version: string;
 }
 
 export interface MenuProduct {
@@ -64,6 +67,8 @@ export async function api<T>(
   path: string,
   { method = "GET", body, timeoutMs = 8000 }: { method?: string; body?: unknown; timeoutMs?: number } = {},
 ): Promise<T> {
+  if (isDemo()) return demoApi<T>(path, { method, body });
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   let res: Response;
