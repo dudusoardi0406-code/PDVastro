@@ -1,4 +1,5 @@
-import { EventLogo, ProductGlyph, ThemeDecor } from "@/app/totem/_components/decor";
+import { EventLogo, ThemeDecor } from "@/app/totem/_components/decor";
+import { Glyph } from "@/app/totem/_components/icons";
 import { themeVars, type ResolvedTheme } from "@/lib/themes";
 
 /** Miniatura do totem com o tema (tela inicial + card de produto). */
@@ -41,7 +42,7 @@ export function ThemePreview({ name, theme }: { name: string; theme: ResolvedThe
                 className="flex items-center justify-center"
                 style={{ aspectRatio: "4 / 3", background: "color-mix(in srgb, var(--t-bg-alt) 35%, var(--t-surface))" }}
               >
-                <ProductGlyph />
+                <Glyph kind="drink" style={{ width: "46%", height: "70%" }} />
               </div>
               <div style={{ padding: u(2.5) }}>
                 <div className="t-display" style={{ fontSize: u(4.4) }}>

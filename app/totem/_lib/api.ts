@@ -26,12 +26,17 @@ export interface MenuProduct {
   name: string;
   description: string | null;
   price_cents: number;
+  /** preço "de" (riscado) */
+  compare_at_cents: number | null;
   image_url: string | null;
 }
 
 export interface MenuCategory {
   id: string;
   name: string;
+  subtitle: string | null;
+  /** destaque (ex.: Promoções do dia) */
+  featured: boolean;
   products: MenuProduct[];
 }
 

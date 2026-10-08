@@ -10,13 +10,13 @@ export function useIsDemo(): boolean {
   return useSyncExternalStore(noop, isDemo, () => false);
 }
 
-/** Selo fixo do modo demonstração, com troca de tema. */
+/** Faixa do modo demonstração (no topo, sem cobrir a tela), com troca de tema. */
 export function DemoBadge() {
   const demo = useIsDemo();
   if (!demo) return null;
   const current = new URLSearchParams(window.location.search).get("tema") === "underground" ? "underground" : "pagode";
   return (
-    <div className="absolute top-0 left-1/2 z-[70] flex -translate-x-1/2 items-center gap-2 rounded-b-xl bg-black/80 px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-white">
+    <div className="relative z-[70] flex flex-none items-center justify-center gap-2 bg-black/85 px-3 py-1 text-xs font-semibold whitespace-nowrap text-white">
       <span>DEMONSTRAÇÃO · nada é cobrado</span>
       {(["pagode", "underground"] as const).map((t) => (
         <a

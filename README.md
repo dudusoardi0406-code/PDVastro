@@ -24,7 +24,11 @@ Escopo e decisões: [pdv-eventos-escopo.md](pdv-eventos-escopo.md).
 1. No **SQL Editor** do projeto Supabase, rode, nesta ordem:
    1. [supabase/migrations/0001_schema.sql](supabase/migrations/0001_schema.sql): tabelas, RLS e o bucket `assets`
    2. [supabase/migrations/0002_functions.sql](supabase/migrations/0002_functions.sql): funções atômicas (pedido, Pix, senha e ficha)
-   3. *(opcional)* [supabase/seed.sql](supabase/seed.sql): 2 eventos de exemplo ("Pagode do Zé" e "Submundo do Funk") com cardápio
+   3. [supabase/migrations/0003_promos.sql](supabase/migrations/0003_promos.sql): categoria em destaque, subtítulo e preço "de" (promoções)
+   4. *(opcional)* [supabase/seed.sql](supabase/seed.sql): 2 eventos de exemplo com cardápio
+      - "Pagode do Zé": promoções do dia, cervejas, drinks, comidas e sem álcool
+      - "Submundo do Funk": o mesmo, sem comidas
+      - Pode rodar de novo: só cria o que falta.
 2. **Crie o usuário do painel**: em Authentication › Users › *Add user*, informe e-mail e senha e marque *Auto confirm*.
 3. **Libere o usuário no painel** (SQL Editor):
    ```sql
@@ -67,6 +71,15 @@ Teste completo com `PIX_PROVIDER=mock`:
 5. Para testar *valor divergente*: em **Pix** › *Simular pagamento*, informe o txid (detalhe do pedido) e um valor diferente.
 
 Sem o Supabase configurado, dá para ver o totem em `/totem/demo`, com cardápio de exemplo e Pix simulado. Nada é salvo.
+
+O layout se ajusta à tela:
+- **Em pé** (totem 1080×1920): categorias à esquerda, produtos no meio e barra "Ver pedido" embaixo.
+- **Deitado** (computador ou monitor): categorias à esquerda, produtos no meio e pedido fixo à direita, com a escala menor.
+
+No cardápio:
+- Categorias marcadas como **Destaque** (ex.: "Promoções do dia") ganham selo "Promo" e chamada na tela inicial.
+- O **preço "de"** aparece riscado ao lado do preço.
+- Os ícones dos produtos sem foto são escolhidos pelo nome (cerveja, balde, long neck, drink, copão, porção, espetinho, prato, lata, água).
 
 Outros comandos:
 - `npm test`: funções puras e banco. As migrações rodam num Postgres embutido (PGlite), sem precisar do Supabase.

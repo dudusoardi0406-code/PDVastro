@@ -17,53 +17,73 @@ const EVENTS: Record<ThemePreset, { name: string; venue: string; prefix: string 
   underground: { name: "Submundo do Funk", venue: "Oásis Camping Club", prefix: "U" },
 };
 
-const p = (id: string, name: string, price_cents: number, description: string | null = null) => ({
+const p = (id: string, name: string, price_cents: number, description: string | null = null, compare_at_cents: number | null = null) => ({
   id,
   name,
   description,
   price_cents,
+  compare_at_cents,
   image_url: null,
 });
 
+const cat = (id: string, name: string, products: ReturnType<typeof p>[], featured = false, subtitle: string | null = null): MenuCategory => ({
+  id,
+  name,
+  subtitle,
+  featured,
+  products,
+});
+
+// mesmo cardápio do supabase/seed.sql (só o Pagode tem comidas)
 const MENUS: Record<ThemePreset, MenuCategory[]> = {
   pagode: [
-    {
-      id: "c1",
-      name: "Cervejas",
-      products: [
-        p("p1", "Original 600ml", 1500, "Garrafa bem gelada"),
-        p("p2", "Balde de Original", 5000, "5 garrafas 600ml"),
-        p("p3", "Heineken long neck", 1200),
-        p("p4", "Spaten long neck", 1200),
+    cat(
+      "c0",
+      "Promoções do dia",
+      [
+        p("p01", "Gin Tropical em dobro", 2500, "2 drinks pelo preço de 1", 5000),
+        p("p02", "Balde de Original", 5000, "5 garrafas 600ml", 6000),
+        p("p03", "Copão de vodka 50% OFF", 1500, "Vodka + energético", 3000),
       ],
-    },
-    {
-      id: "c2",
-      name: "Drinks",
-      products: [
-        p("p5", "Gin Tropical", 2500, "Gin, tônica e frutas"),
-        p("p6", "Copão de vodka", 3000, "Vodka + energético"),
-        p("p7", "Caipirinha", 1800, "Limão, cachaça e açúcar"),
-      ],
-    },
-    {
-      id: "c3",
-      name: "Sem álcool",
-      products: [p("p8", "Água", 500, "500ml"), p("p9", "Refrigerante lata", 700), p("p10", "Energético", 1500)],
-    },
+      true,
+      "Válidas até as 22h",
+    ),
+    cat("c1", "Cervejas", [
+      p("p11", "Original 600ml", 1500, "Garrafa bem gelada"),
+      p("p12", "Heineken long neck", 1200),
+      p("p13", "Spaten long neck", 1200),
+    ]),
+    cat("c2", "Drinks", [
+      p("p21", "Gin Tropical", 2500, "Gin, tônica e frutas"),
+      p("p22", "Copão de vodka", 3000, "Vodka + energético"),
+      p("p23", "Caipirinha", 1800, "Limão, cachaça e açúcar"),
+    ]),
+    cat("c3", "Comidas", [
+      p("p31", "Porção de batata frita", 3200, "Serve 2 pessoas"),
+      p("p32", "Calabresa acebolada", 3800, "Com pão"),
+      p("p33", "Isca de frango", 4200, "Com molho da casa"),
+      p("p34", "Espetinho de carne", 1200, "Com farofa"),
+    ]),
+    cat("c4", "Sem álcool", [p("p41", "Água", 500, "500ml"), p("p42", "Refrigerante lata", 700), p("p43", "Energético", 1500)]),
   ],
   underground: [
-    {
-      id: "c1",
-      name: "Cervejas",
-      products: [p("p1", "Heineken long neck", 1300), p("p2", "Balde Heineken", 6000, "5 long necks")],
-    },
-    {
-      id: "c2",
-      name: "Drinks",
-      products: [p("p3", "Copão de whisky", 3500, "Whisky + energético"), p("p4", "Gummy shot", 1000, "Bala de gin")],
-    },
-    { id: "c3", name: "Sem álcool", products: [p("p5", "Água", 500, "500ml"), p("p6", "Energético", 1500)] },
+    cat(
+      "c0",
+      "Promoções do dia",
+      [
+        p("p01", "Balde Heineken", 6000, "5 long necks", 7000),
+        p("p02", "Combo copão + energético", 4000, "Whisky ou vodka", 5000),
+      ],
+      true,
+      "Open gummy até 00h",
+    ),
+    cat("c1", "Cervejas", [p("p11", "Heineken long neck", 1300), p("p12", "Amstel lata", 900)]),
+    cat("c2", "Drinks", [
+      p("p21", "Copão de whisky", 3500, "Whisky + energético"),
+      p("p22", "Gummy shot", 1000, "Bala de gin"),
+      p("p23", "Vodka com energético", 3000),
+    ]),
+    cat("c3", "Sem álcool", [p("p31", "Água", 500, "500ml"), p("p32", "Energético", 1500)]),
   ],
 };
 

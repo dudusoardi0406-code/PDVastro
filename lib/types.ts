@@ -24,6 +24,9 @@ export interface CategoryRow {
   name: string;
   position: number;
   active: boolean;
+  /** destaque no totem (ex.: Promoções do dia) */
+  featured: boolean;
+  subtitle: string | null;
   created_at: string;
 }
 
@@ -34,6 +37,8 @@ export interface ProductRow {
   name: string;
   description: string | null;
   price_cents: number;
+  /** preço "de" (riscado) */
+  compare_at_cents: number | null;
   image_url: string | null;
   position: number;
   active: boolean;

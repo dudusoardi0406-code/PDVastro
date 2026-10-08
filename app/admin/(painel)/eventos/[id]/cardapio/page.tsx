@@ -115,11 +115,21 @@ function CategoryCard({
           <Field label="Categoria" className="min-w-48 flex-1">
             <input name="name" defaultValue={category.name} required maxLength={60} className={`${inputClass} font-semibold`} />
           </Field>
+          <Field label="Subtítulo (opcional)" className="min-w-48 flex-1">
+            <input
+              name="subtitle"
+              defaultValue={category.subtitle ?? ""}
+              maxLength={80}
+              placeholder="Ex.: Válidas até as 22h"
+              className={inputClass}
+            />
+          </Field>
           <Field label="Ordem" className="w-20">
             <input name="position" type="number" min={0} max={999} defaultValue={category.position} className={inputClass} />
           </Field>
-          <div className="pb-2">
+          <div className="flex flex-col gap-1 pb-1">
             <Checkbox name="active" label="Ativa" defaultChecked={category.active} />
+            <Checkbox name="featured" label="Destaque (promoções)" defaultChecked={category.featured} />
           </div>
           <SubmitButton variant="secondary">Salvar</SubmitButton>
         </ActionForm>
@@ -148,7 +158,10 @@ function CategoryCard({
                   <div className="font-medium">{p.name}</div>
                   {p.description && <div className="truncate text-xs text-muted">{p.description}</div>}
                 </div>
-                <span className="font-semibold tabular-nums">{formatBRL(p.price_cents)}</span>
+                <span className="text-right tabular-nums">
+                  {p.compare_at_cents && <s className="mr-1.5 text-xs text-muted">{formatBRL(p.compare_at_cents)}</s>}
+                  <span className="font-semibold">{formatBRL(p.price_cents)}</span>
+                </span>
                 {p.active ? <Badge tone="green">Ativo</Badge> : <Badge>Inativo</Badge>}
                 <span className="text-xs text-brand group-open:hidden">Editar</span>
                 <span className="hidden text-xs text-muted group-open:inline">Fechar</span>
@@ -216,6 +229,15 @@ function ProductForm({
             name="price"
             defaultValue={product ? centsToInput(product.price_cents) : ""}
             required
+            inputMode="decimal"
+            placeholder="0,00"
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Preço original / de (opcional)" hint="Aparece riscado no totem. Ex.: 20,00">
+          <input
+            name="compare_at"
+            defaultValue={product?.compare_at_cents ? centsToInput(product.compare_at_cents) : ""}
             inputMode="decimal"
             placeholder="0,00"
             className={inputClass}

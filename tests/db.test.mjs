@@ -34,6 +34,8 @@ before(async () => {
   `);
   await db.exec(sqlFile("migrations/0001_schema.sql"));
   await db.exec(sqlFile("migrations/0002_functions.sql"));
+  await db.exec(sqlFile("migrations/0003_promos.sql"));
+  await db.exec(sqlFile("migrations/0003_promos.sql")); // idempotente
   await db.exec(sqlFile("seed.sql"));
   await db.exec(sqlFile("seed.sql")); // idempotente
 
@@ -47,6 +49,19 @@ before(async () => {
 test("seed roda duas vezes sem duplicar e cria o bucket", async () => {
   assert.equal(await val("select count(*)::int from events"), 2);
   assert.equal(await val("select count(*)::int from storage.buckets where id = 'assets'"), 1);
+  assert.equal(await val("select count(*)::int from products p join events e on e.id = p.event_id where e.slug = 'pagode-do-ze'"), 16);
+  assert.equal(await val("select count(*)::int from products p join events e on e.id = p.event_id where e.slug = 'submundo-do-funk'"), 9);
+});
+
+test("promoções: destaque, preço 'de' e só o Pagode tem comidas", async () => {
+  const promo = await one("select featured, subtitle from categories where event_id = $1 and name = 'Promoções do dia'", [pagode]);
+  assert.equal(promo.featured, true);
+  assert.equal(promo.subtitle, "Válidas até as 22h");
+  assert.equal(await val("select compare_at_cents from products where event_id = $1 and name = 'Balde de Original'", [pagode]), 6000);
+  assert.equal(await val("select count(*)::int from categories where event_id = $1 and name = 'Comidas'", [pagode]), 1);
+  assert.equal(await val("select count(*)::int from categories where event_id = $1 and name = 'Comidas'", [under]), 0);
+  // preço "de" precisa ser maior que o preço cobrado
+  await rejects("update products set compare_at_cents = price_cents where event_id = $1", [pagode], "products_compare_at_gt_price");
 });
 
 test("dia operacional vira às 06:00", async () => {
@@ -158,8 +173,12 @@ test("relatório do dia e conciliação", async () => {
 
 test("copiar cardápio e integridade de categoria por evento", async () => {
   const to = await val("insert into events (slug, name) values ('copia', 'Cópia') returning id");
-  assert.equal(await val("select copy_menu($1, $2)", [pagode, to]), 9);
-  assert.equal(await val("select count(*)::int from categories where event_id = $1", [to]), 3);
+  const products = await val("select count(*)::int from products where event_id = $1", [pagode]);
+  const categories = await val("select count(*)::int from categories where event_id = $1", [pagode]);
+  assert.equal(await val("select copy_menu($1, $2)", [pagode, to]), products);
+  assert.equal(await val("select count(*)::int from categories where event_id = $1", [to]), categories);
+  assert.equal(await val("select count(*)::int from categories where event_id = $1 and featured", [to]), 1);
+  assert.equal(await val("select count(*)::int from products where event_id = $1 and compare_at_cents is not null", [to]), 3);
   await rejects("select copy_menu($1, $1)", [pagode], "MESMO_EVENTO");
 
   const underCat = await val("select id from categories where event_id = $1 limit 1", [under]);

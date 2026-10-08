@@ -4,10 +4,14 @@
    ========================================================================== */
 
 .totem {
-  /* unidade base: cabe em retrato 1080x1920 e em paisagem */
+  /* unidade base. Em pé (totem 1080x1920): ~10,8px. Deitado (computador,
+     monitor), a tela é baixa: a unidade fica menor e o layout mais denso. */
   --u: min(1vw, 0.75vh);
   --t-display: var(--font-lilita);
   --t-label: var(--font-lilita);
+  /* largura mínima do card de produto */
+  --t-card-min: calc(var(--u) * 42);
+  --t-card-img: 4 / 3;
 
   position: fixed;
   inset: 0;
@@ -18,7 +22,7 @@
   color: var(--t-text);
   font-family: var(--font-archivo), sans-serif;
   font-size: calc(var(--u) * 3);
-  line-height: 1.2;
+  line-height: 1.25;
   -webkit-user-select: none;
   user-select: none;
   touch-action: manipulation;
@@ -26,13 +30,23 @@
   overscroll-behavior: none;
 }
 
+@media (orientation: landscape) {
+  .totem {
+    --u: min(0.6vw, 0.66vh);
+    --t-card-min: calc(var(--u) * 40);
+    --t-card-img: 16 / 10;
+  }
+}
+
 /* versão em miniatura usada no admin (prévia do tema): mesma proporção do
-   totem em retrato, 1u = 1% da largura do quadro */
+   totem em pé, 1u = 1% da largura do quadro */
 .totem-frame {
   container-type: inline-size;
 }
 .totem.totem-preview {
   --u: 1cqw;
+  --t-card-min: calc(var(--u) * 42);
+  --t-card-img: 4 / 3;
   position: relative;
   inset: auto;
   border-radius: 12px;
@@ -49,21 +63,20 @@
 .totem-scroll {
   overflow-y: auto;
   scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
 }
 .totem-scroll::-webkit-scrollbar {
   display: none;
 }
 
 /* --------------------------------------------------------------------------
-   Fundos
+   Fundos (padrões discretos para não disputar com o cardápio)
    -------------------------------------------------------------------------- */
 .totem[data-preset="pagode"] {
   --t-display: var(--font-lilita);
   --t-label: var(--font-lilita);
   background-image:
     var(--t-bg-image),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='144'%3E%3Cpath d='M48 0 96 72 48 144 0 72Z' fill='%23ffffff' fill-opacity='0.06'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='144'%3E%3Cpath d='M48 0 96 72 48 144 0 72Z' fill='%23ffffff' fill-opacity='0.05'/%3E%3C/svg%3E"),
     radial-gradient(ellipse 120% 70% at 50% 0%, var(--t-bg-alt), var(--t-bg) 75%);
   background-size: cover, calc(var(--u) * 9) calc(var(--u) * 13.5), cover;
   background-position: center, center, center;
@@ -74,18 +87,18 @@
   --t-label: var(--font-anton);
   background-image:
     var(--t-bg-image),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='56'%3E%3Cpath d='M0 28 C40 4 80 4 120 28 S200 52 240 28' fill='none' stroke='%23D9261C' stroke-opacity='0.28' stroke-width='14'/%3E%3Cpath d='M-80 28 C-40 52 0 52 0 28' fill='none' stroke='%23D9261C' stroke-opacity='0.28' stroke-width='14'/%3E%3C/svg%3E"),
-    linear-gradient(180deg, var(--t-bg-alt), var(--t-bg) 55%);
-  background-size: cover, calc(var(--u) * 16) calc(var(--u) * 5.6), cover;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='56'%3E%3Cpath d='M0 28 C40 4 80 4 120 28 S200 52 240 28' fill='none' stroke='%23D9261C' stroke-opacity='0.2' stroke-width='14'/%3E%3Cpath d='M-80 28 C-40 52 0 52 0 28' fill='none' stroke='%23D9261C' stroke-opacity='0.2' stroke-width='14'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, var(--t-bg-alt), var(--t-bg) 45%);
+  background-size: cover, calc(var(--u) * 20) calc(var(--u) * 7), cover;
 }
 
-/* granulado do tema underground */
+/* granulado leve do tema underground */
 .totem[data-preset="underground"]::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.16;
+  opacity: 0.12;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   z-index: 50;
@@ -96,25 +109,27 @@
    -------------------------------------------------------------------------- */
 .t-display {
   font-family: var(--t-display);
-  line-height: 0.95;
+  line-height: 1;
   letter-spacing: 0.01em;
 }
 
 .t-label {
   font-family: var(--t-label);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
 }
 
-/* título "3D" do pagode: preenchimento amarelo, contorno e sombra empilhada */
+.t-muted {
+  opacity: 0.7;
+}
+
+/* título "3D" do pagode: preenchimento amarelo, contorno e sombra */
 .totem[data-preset="pagode"] .t-title {
   font-family: var(--t-display);
   color: var(--t-primary);
-  -webkit-text-stroke: 0.07em var(--t-ink);
+  -webkit-text-stroke: 0.06em var(--t-ink);
   paint-order: stroke fill;
-  text-shadow:
-    0.03em 0.05em 0 var(--t-ink),
-    0.06em 0.1em 0 var(--t-ink);
+  text-shadow: 0.04em 0.07em 0 var(--t-ink);
   line-height: 0.95;
 }
 
@@ -123,10 +138,7 @@
   font-family: var(--t-display);
   color: var(--t-text);
   text-transform: uppercase;
-  text-shadow:
-    0.05em 0.05em 0 var(--t-primary),
-    -0.02em -0.02em 0 var(--t-ink);
-  transform: rotate(-2deg);
+  text-shadow: 0.05em 0.05em 0 var(--t-primary);
   line-height: 0.95;
 }
 
@@ -141,14 +153,14 @@
   min-height: calc(var(--u) * 11);
   padding: 0 1.4em;
   font-family: var(--t-label);
-  font-size: calc(var(--u) * 4.6);
+  font-size: calc(var(--u) * 4.4);
   text-transform: uppercase;
   background: var(--t-primary);
   color: var(--t-primary-text) !important;
-  transition: transform 80ms ease, box-shadow 80ms ease, filter 80ms ease;
+  transition: transform 80ms ease, box-shadow 80ms ease, filter 80ms ease, opacity 80ms ease;
 }
 .t-btn:disabled {
-  filter: grayscale(0.7) brightness(0.8);
+  opacity: 0.45;
   pointer-events: none;
 }
 .t-btn-ghost {
@@ -159,23 +171,35 @@
   background: var(--t-secondary);
   color: var(--t-secondary-text) !important;
 }
+/* botão só com texto (Limpar, Recomeçar) */
+.t-link {
+  font-family: var(--t-label);
+  font-size: calc(var(--u) * 3);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.8;
+  padding: calc(var(--u) * 1.5) calc(var(--u) * 2);
+}
+.t-link:active {
+  opacity: 1;
+}
 
 .totem[data-preset="pagode"] .t-btn {
-  border: calc(var(--u) * 0.6) solid var(--t-ink);
-  border-radius: calc(var(--u) * 4);
-  box-shadow: 0 calc(var(--u) * 1) 0 var(--t-ink);
+  border: calc(var(--u) * 0.45) solid var(--t-ink);
+  border-radius: calc(var(--u) * 3.5);
+  box-shadow: 0 calc(var(--u) * 0.7) 0 var(--t-ink);
 }
 .totem[data-preset="pagode"] .t-btn:active {
-  transform: translateY(calc(var(--u) * 0.8));
+  transform: translateY(calc(var(--u) * 0.5));
   box-shadow: 0 calc(var(--u) * 0.2) 0 var(--t-ink);
 }
 .totem[data-preset="pagode"] .t-btn-ghost {
-  border-color: var(--t-text);
+  border-color: color-mix(in srgb, var(--t-text) 70%, transparent);
   box-shadow: none;
 }
 
 .totem[data-preset="underground"] .t-btn {
-  --notch: calc(var(--u) * 3.2);
+  --notch: calc(var(--u) * 2.6);
   padding: 0 calc(var(--notch) + 0.8em);
   letter-spacing: 0.04em;
   clip-path: polygon(var(--notch) 0, calc(100% - var(--notch)) 0, 100% 50%, calc(100% - var(--notch)) 100%, var(--notch) 100%, 0 50%);
@@ -185,7 +209,7 @@
   filter: brightness(1.15);
 }
 .totem[data-preset="underground"] .t-btn-ghost {
-  background: color-mix(in srgb, var(--t-text) 14%, transparent);
+  background: color-mix(in srgb, var(--t-text) 12%, transparent);
 }
 
 /* botão redondo +/- */
@@ -193,11 +217,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: calc(var(--u) * 8);
-  height: calc(var(--u) * 8);
+  width: calc(var(--u) * 7.5);
+  height: calc(var(--u) * 7.5);
   flex: none;
   font-family: var(--t-label);
-  font-size: calc(var(--u) * 5);
+  font-size: calc(var(--u) * 4.4);
   line-height: 1;
   background: var(--t-primary);
   color: var(--t-primary-text) !important;
@@ -207,19 +231,18 @@
   transform: scale(0.9);
 }
 .t-step-minus {
-  background: var(--t-surface);
+  background: transparent;
   color: var(--t-surface-text) !important;
 }
 .totem[data-preset="pagode"] .t-step {
   border-radius: 999px;
-  border: calc(var(--u) * 0.5) solid var(--t-ink);
-  box-shadow: 0 calc(var(--u) * 0.6) 0 var(--t-ink);
+  border: calc(var(--u) * 0.4) solid var(--t-ink);
 }
 .totem[data-preset="underground"] .t-step {
   clip-path: polygon(18% 0, 82% 0, 100% 50%, 82% 100%, 18% 100%, 0 50%);
 }
 .totem[data-preset="underground"] .t-step-minus {
-  background: color-mix(in srgb, var(--t-surface-text) 18%, var(--t-surface));
+  background: color-mix(in srgb, var(--t-surface-text) 16%, var(--t-surface));
 }
 
 /* --------------------------------------------------------------------------
@@ -227,32 +250,32 @@
    -------------------------------------------------------------------------- */
 .t-tab {
   flex: none;
-  min-height: calc(var(--u) * 8.5);
+  min-height: calc(var(--u) * 8);
   padding: 0 1.1em;
   font-family: var(--t-label);
-  font-size: calc(var(--u) * 3.6);
+  font-size: calc(var(--u) * 3.4);
   text-transform: uppercase;
   white-space: nowrap;
-  transition: transform 80ms ease;
+  transition: transform 80ms ease, background 120ms ease;
 }
 .t-tab:active {
   transform: scale(0.96);
 }
 .totem[data-preset="pagode"] .t-tab {
   border-radius: 999px;
-  border: calc(var(--u) * 0.5) solid var(--t-ink);
-  background: color-mix(in srgb, var(--t-surface) 92%, transparent);
-  color: var(--t-ink) !important;
+  border: calc(var(--u) * 0.35) solid color-mix(in srgb, var(--t-text) 45%, transparent);
+  background: transparent;
+  color: var(--t-text) !important;
 }
 .totem[data-preset="pagode"] .t-tab[aria-pressed="true"] {
+  border-color: var(--t-ink);
   background: var(--t-primary);
   color: var(--t-primary-text) !important;
-  box-shadow: 0 calc(var(--u) * 0.6) 0 var(--t-ink);
 }
 .totem[data-preset="underground"] .t-tab {
-  --notch: calc(var(--u) * 2.4);
+  --notch: calc(var(--u) * 2.2);
   padding: 0 calc(var(--notch) + 0.7em);
-  background: #000;
+  background: rgb(0 0 0 / 0.7);
   color: var(--t-text) !important;
   clip-path: polygon(var(--notch) 0, calc(100% - var(--notch)) 0, 100% 50%, calc(100% - var(--notch)) 100%, var(--notch) 100%, 0 50%);
 }
@@ -262,49 +285,43 @@
 }
 
 /* --------------------------------------------------------------------------
-   Cards de produto e painéis
+   Cardápio, cards e painéis
    -------------------------------------------------------------------------- */
+.t-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--t-card-min), 46%), 1fr));
+  gap: calc(var(--u) * 3);
+}
+
 .t-card {
   position: relative;
   display: flex;
   flex-direction: column;
-  text-align: left;
   min-width: 0;
+  text-align: left;
   background: var(--t-surface);
   color: var(--t-surface-text);
   /* clip (e não hidden): o foco de um botão não "rola" o conteúdo do card */
   overflow: clip;
 }
+.t-card-img {
+  aspect-ratio: var(--t-card-img);
+  background: color-mix(in srgb, var(--t-bg-alt) 22%, var(--t-surface));
+}
 .totem[data-preset="pagode"] .t-card {
-  border: calc(var(--u) * 0.6) solid var(--t-ink);
-  border-radius: calc(var(--u) * 2.6);
-  box-shadow: 0 calc(var(--u) * 1) 0 var(--t-ink);
+  border: calc(var(--u) * 0.35) solid var(--t-ink);
+  border-radius: calc(var(--u) * 2.4);
+  box-shadow: 0 calc(var(--u) * 0.6) 0 var(--t-ink);
 }
 .totem[data-preset="pagode"] .t-card[data-selected="true"] {
-  outline: calc(var(--u) * 0.8) solid var(--t-primary);
-  outline-offset: calc(var(--u) * -0.2);
+  outline: calc(var(--u) * 0.6) solid var(--t-primary);
 }
 .totem[data-preset="underground"] .t-card {
-  border: calc(var(--u) * 0.35) solid color-mix(in srgb, var(--t-surface-text) 70%, transparent);
-  clip-path: polygon(0 1.5%, 2.5% 0, 97% 0.8%, 100% 3%, 99.4% 97%, 97% 100%, 3% 99.2%, 0.4% 97.5%);
+  border: calc(var(--u) * 0.25) solid color-mix(in srgb, var(--t-surface-text) 35%, transparent);
+  clip-path: polygon(0 1%, 2% 0, 98% 0.5%, 100% 2%, 99.5% 98%, 98% 100%, 2% 99.5%, 0.3% 98%);
 }
 .totem[data-preset="underground"] .t-card[data-selected="true"] {
   border-color: var(--t-primary);
-  background: color-mix(in srgb, var(--t-primary) 16%, var(--t-surface));
-}
-
-/* furinhos de caderno no topo do papel (pagode) */
-.totem[data-preset="pagode"] .t-paper::before {
-  content: "";
-  position: absolute;
-  top: calc(var(--u) * 1.2);
-  left: calc(var(--u) * 3);
-  right: calc(var(--u) * 3);
-  height: calc(var(--u) * 1.6);
-  background: radial-gradient(circle, var(--t-ink) 42%, transparent 46%) 0 0 / calc(var(--u) * 3.4) 100% repeat-x;
-  opacity: 0.85;
-  z-index: 1;
-  pointer-events: none;
 }
 
 .t-panel {
@@ -313,12 +330,60 @@
   color: var(--t-surface-text);
 }
 .totem[data-preset="pagode"] .t-panel {
-  border: calc(var(--u) * 0.6) solid var(--t-ink);
-  border-radius: calc(var(--u) * 3);
-  box-shadow: 0 calc(var(--u) * 1.2) 0 var(--t-ink);
+  border: calc(var(--u) * 0.35) solid var(--t-ink);
+  border-radius: calc(var(--u) * 2.6);
+  box-shadow: 0 calc(var(--u) * 0.7) 0 var(--t-ink);
 }
 .totem[data-preset="underground"] .t-panel {
-  border: calc(var(--u) * 0.35) solid color-mix(in srgb, var(--t-surface-text) 70%, transparent);
+  border: calc(var(--u) * 0.25) solid color-mix(in srgb, var(--t-surface-text) 35%, transparent);
+}
+/* bloquinho de papel com furos no topo (pagode), como as notas do flyer */
+.totem[data-preset="pagode"] .t-paper {
+  padding-top: calc(var(--u) * 5) !important;
+}
+.totem[data-preset="pagode"] .t-paper::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--u) * 1.4);
+  left: calc(var(--u) * 3);
+  right: calc(var(--u) * 3);
+  height: calc(var(--u) * 1.5);
+  background: radial-gradient(circle, var(--t-ink) 40%, transparent 45%) 0 0 / calc(var(--u) * 3.2) 100% repeat-x;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* título de seção com traço de marca-texto */
+.t-heading {
+  position: relative;
+  isolation: isolate;
+  display: inline-block;
+  font-family: var(--t-display);
+  line-height: 1;
+}
+.totem[data-preset="pagode"] .t-heading::after {
+  content: "";
+  position: absolute;
+  left: -0.15em;
+  right: -0.25em;
+  bottom: -0.05em;
+  height: 0.35em;
+  background: var(--t-accent);
+  border-radius: 999px;
+  transform: rotate(-1.5deg);
+  z-index: -1;
+  opacity: 0.9;
+}
+.totem[data-preset="underground"] .t-heading {
+  text-transform: uppercase;
+  padding: 0.12em 0.6em 0.08em;
+  background: var(--t-primary);
+  color: var(--t-primary-text);
+  clip-path: polygon(0.4em 0, calc(100% - 0.4em) 0, 100% 50%, calc(100% - 0.4em) 100%, 0.4em 100%, 0 50%);
+}
+
+.t-divider {
+  border-bottom: 1px dashed color-mix(in srgb, var(--t-surface-text) 22%, transparent);
 }
 
 /* etiqueta de preço */
@@ -326,7 +391,7 @@
   display: inline-flex;
   align-items: center;
   font-family: var(--t-label);
-  font-size: calc(var(--u) * 4);
+  font-size: calc(var(--u) * 3.8);
   line-height: 1;
   white-space: nowrap;
 }
@@ -334,19 +399,18 @@
   padding: 0.25em 0.45em 0.2em;
   background: var(--t-accent);
   color: var(--t-accent-text);
-  border: calc(var(--u) * 0.45) solid var(--t-ink);
-  border-radius: calc(var(--u) * 1.2);
-  transform: rotate(-3deg);
+  border-radius: calc(var(--u) * 1);
+  transform: rotate(-2deg);
 }
 .totem[data-preset="underground"] .t-price {
-  --notch: 0.5em;
+  --notch: 0.45em;
   padding: 0.25em 0.5em 0.2em calc(var(--notch) + 0.35em);
   background: var(--t-secondary);
   color: var(--t-primary);
   clip-path: polygon(var(--notch) 0, 100% 0, 100% 100%, var(--notch) 100%, 0 50%);
 }
 
-/* faixa de destaque (contador, chips) */
+/* faixa de destaque */
 .t-ribbon {
   display: inline-flex;
   align-items: center;
@@ -359,7 +423,6 @@
 }
 .totem[data-preset="pagode"] .t-ribbon {
   border-radius: 999px;
-  border: calc(var(--u) * 0.45) solid var(--t-ink);
 }
 .totem[data-preset="underground"] .t-ribbon {
   --notch: 0.6em;
@@ -367,14 +430,141 @@
   clip-path: polygon(var(--notch) 0, calc(100% - var(--notch)) 0, 100% 50%, calc(100% - var(--notch)) 100%, var(--notch) 100%, 0 50%);
 }
 
-/* barra inferior do carrinho */
+/* barra inferior do carrinho (totem em pé) */
 .t-cartbar {
-  background: color-mix(in srgb, var(--t-bg) 82%, black);
-  border-top: calc(var(--u) * 0.6) solid var(--t-ink);
+  background: color-mix(in srgb, var(--t-bg) 80%, black);
 }
 .totem[data-preset="underground"] .t-cartbar {
-  border-top: calc(var(--u) * 0.5) solid var(--t-primary);
+  border-top: calc(var(--u) * 0.3) solid var(--t-primary);
   background: #000;
+}
+
+/* botão de categoria (coluna da esquerda, estilo totem de fast food) */
+.t-cat {
+  position: relative;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 1.2);
+  min-height: calc(var(--u) * 17);
+  padding: calc(var(--u) * 2) calc(var(--u) * 1.2);
+  text-align: center;
+  transition: transform 80ms ease, background 120ms ease;
+}
+.t-cat:active {
+  transform: scale(0.96);
+}
+.t-cat-count {
+  position: absolute;
+  top: calc(var(--u) * 1);
+  right: calc(var(--u) * 1);
+  min-width: calc(var(--u) * 4.4);
+  height: calc(var(--u) * 4.4);
+  padding: 0 calc(var(--u) * 1);
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  font-family: var(--t-label);
+  font-size: calc(var(--u) * 2.4);
+  background: var(--t-accent);
+  color: var(--t-accent-text);
+}
+.totem[data-preset="pagode"] .t-cat {
+  border-radius: calc(var(--u) * 2.4);
+  border: calc(var(--u) * 0.35) solid transparent;
+  background: color-mix(in srgb, var(--t-surface) 12%, transparent);
+  color: var(--t-text);
+}
+.totem[data-preset="pagode"] .t-cat[data-featured="true"] {
+  border-color: color-mix(in srgb, var(--t-primary) 70%, transparent);
+  border-style: dashed;
+}
+.totem[data-preset="pagode"] .t-cat[aria-pressed="true"] {
+  background: var(--t-surface);
+  color: var(--t-surface-text);
+  border: calc(var(--u) * 0.35) solid var(--t-ink);
+  box-shadow: 0 calc(var(--u) * 0.6) 0 var(--t-ink);
+}
+.totem[data-preset="underground"] .t-cat {
+  background: rgb(0 0 0 / 0.55);
+  color: var(--t-text);
+  border-left: calc(var(--u) * 0.6) solid transparent;
+}
+.totem[data-preset="underground"] .t-cat[data-featured="true"] {
+  border-left-color: color-mix(in srgb, var(--t-primary) 60%, transparent);
+}
+.totem[data-preset="underground"] .t-cat[aria-pressed="true"] {
+  background: var(--t-primary);
+  color: var(--t-primary-text);
+  border-left-color: var(--t-secondary);
+}
+
+/* selo "Promo" no card */
+.t-badge {
+  font-family: var(--t-label);
+  font-size: calc(var(--u) * 2.4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.3em 0.7em 0.25em;
+  background: var(--t-accent);
+  color: var(--t-accent-text);
+}
+.totem[data-preset="pagode"] .t-badge {
+  border-radius: 999px;
+  border: calc(var(--u) * 0.3) solid var(--t-ink);
+  transform: rotate(-4deg);
+}
+.totem[data-preset="underground"] .t-badge {
+  background: var(--t-secondary);
+  color: var(--t-primary);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 0.5em) 50%, 100% 100%, 0 100%);
+  padding-right: 1.1em;
+}
+
+/* chamada das promoções na tela inicial */
+.t-promo-callout {
+  padding: calc(var(--u) * 2) calc(var(--u) * 4) calc(var(--u) * 2) calc(var(--u) * 2.5);
+  background: color-mix(in srgb, var(--t-bg) 55%, black);
+  color: var(--t-text);
+}
+.totem[data-preset="pagode"] .t-promo-callout {
+  border-radius: calc(var(--u) * 3);
+  border: calc(var(--u) * 0.35) dashed var(--t-primary);
+}
+.totem[data-preset="underground"] .t-promo-callout {
+  background: rgb(0 0 0 / 0.65);
+  border-left: calc(var(--u) * 0.8) solid var(--t-primary);
+}
+
+/* tela do Pix: empilhada em pé, QR à esquerda quando deitado */
+.totem {
+  --t-qr: calc(var(--u) * 56);
+}
+@media (orientation: landscape) {
+  .totem {
+    --t-qr: calc(var(--u) * 68);
+  }
+}
+.t-pay {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  text-align: center;
+  grid-template-areas: "title" "price" "qr" "steps" "timer" "actions";
+  gap: calc(var(--u) * 3.5);
+}
+@media (orientation: landscape) {
+  .t-pay {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "qr title" "qr price" "qr steps" "qr timer" "qr actions";
+    justify-content: center;
+    justify-items: start;
+    text-align: left;
+    column-gap: calc(var(--u) * 10);
+    row-gap: calc(var(--u) * 3);
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -382,15 +572,15 @@
    -------------------------------------------------------------------------- */
 @keyframes t-pulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.06); }
+  50% { transform: scale(1.04); }
 }
 .t-pulse {
-  animation: t-pulse 1.6s ease-in-out infinite;
+  animation: t-pulse 1.8s ease-in-out infinite;
 }
 
 @keyframes t-pop {
   0% { transform: scale(0.6); opacity: 0; }
-  70% { transform: scale(1.08); opacity: 1; }
+  70% { transform: scale(1.06); opacity: 1; }
   100% { transform: scale(1); }
 }
 .t-pop {
@@ -399,10 +589,10 @@
 
 @keyframes t-float {
   0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
-  50% { transform: translateY(calc(var(--u) * -1.2)) rotate(var(--r, 0deg)); }
+  50% { transform: translateY(calc(var(--u) * -1)) rotate(var(--r, 0deg)); }
 }
 .t-float {
-  animation: t-float 5s ease-in-out infinite;
+  animation: t-float 6s ease-in-out infinite;
 }
 
 @keyframes t-spin {

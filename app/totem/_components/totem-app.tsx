@@ -17,7 +17,9 @@ import {
   pruneCart,
   u,
   type Cart,
+  type OrderActions,
 } from "./screens";
+import { useMediaQuery } from "../_lib/use-media";
 
 type Screen =
   | { name: "idle" }
@@ -44,6 +46,8 @@ export function TotemApp() {
   const [pairingError] = useState(
     () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("erro") === "pareamento",
   );
+  /** deitado (computador/monitor): cardápio + pedido lado a lado */
+  const wide = useMediaQuery("(orientation: landscape)");
   const [connection, setConnection] = useState<Connection>("boot");
   const [hb, setHb] = useState<Heartbeat | null>(null);
   const [offline, setOffline] = useState(false);
@@ -399,6 +403,15 @@ export function TotemApp() {
   const event = hb?.event ?? null;
   const theme = event?.theme ?? FALLBACK_THEME;
   const serverNow = now + clockOffset;
+  const order: OrderActions = {
+    cart,
+    onAdd: add,
+    onRemove: remove,
+    onClear: () => setCart({}),
+    onPay: pay,
+    busy,
+    error,
+  };
 
   let content: React.ReactNode;
   if (connection === "boot") {
@@ -424,36 +437,31 @@ export function TotemApp() {
       />
     );
   } else if (screen.name === "idle") {
-    content = <IdleScreen event={event} onStart={start} />;
-  } else if (screen.name === "menu") {
+    content = <IdleScreen event={event} promo={menu?.find((c) => c.featured) ?? null} onStart={start} />;
+  } else if (screen.name === "menu" || (screen.name === "cart" && wide)) {
+    // deitado, o pedido fica na lateral do cardápio (sem tela "Seu pedido" separada)
     content = (
       <MenuScreen
         event={event}
         categories={menu}
         activeCategoryId={activeCategory}
         onSelectCategory={setActiveCategory}
-        cart={cart}
-        onAdd={add}
-        onRemove={remove}
         onReview={() => setScreen({ name: "cart" })}
         onExit={reset}
+        wide={wide}
+        order={order}
       />
     );
   } else if (screen.name === "cart") {
     content = (
       <CartScreen
         categories={menu}
-        cart={cart}
-        onAdd={add}
-        onRemove={remove}
-        onBack={() => setScreen({ name: "menu" })}
+        {...order}
         onClear={() => {
           setCart({});
           setScreen({ name: "menu" });
         }}
-        onPay={pay}
-        busy={busy}
-        error={error}
+        onBack={() => setScreen({ name: "menu" })}
       />
     );
   } else if (screen.name === "payment") {
@@ -472,6 +480,7 @@ export function TotemApp() {
   } else if (screen.name === "paid") {
     content = (
       <PaidScreen
+        event={event}
         ticketCode={screen.ticketCode}
         secondsLeft={Math.max(0, Math.ceil((PAID_RETURN_MS - Math.max(0, now - screen.at)) / 1000))}
         onDone={reset}
@@ -497,6 +506,7 @@ export function TotemApp() {
         style={themeVars(theme)}
         onContextMenu={(e) => e.preventDefault()}
       >
+        <DemoBadge />
         {content}
 
         {askStillThere !== null && !offline && (
@@ -533,8 +543,6 @@ export function TotemApp() {
             </span>
           </Overlay>
         )}
-
-        <DemoBadge />
 
         {toast && (
           <div

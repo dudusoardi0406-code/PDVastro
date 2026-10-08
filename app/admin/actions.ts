@@ -201,8 +201,10 @@ export async function updateCategory(categoryId: string, _prev: ActionState, fd:
         .from("categories")
         .update({
           name: text(fd, "name", { required: true, max: 60, label: "Nome da categoria" }),
+          subtitle: text(fd, "subtitle", { max: 80, label: "Subtítulo" }),
           position: int(fd, "position", { min: 0, max: 999, fallback: 0, label: "Ordem" }),
           active: bool(fd, "active"),
+          featured: bool(fd, "featured"),
         })
         .eq("id", categoryId),
       "salvar categoria",
@@ -221,11 +223,18 @@ export async function deleteCategory(categoryId: string, _prev: ActionState): Pr
 function productFields(fd: FormData) {
   const price = parseBRLInput(text(fd, "price", { required: true, label: "Preço" })!);
   if (price === null || price <= 0) throw new FormError("Preço inválido. Exemplo: 12,50");
+  const compareRaw = text(fd, "compare_at", { label: "Preço original" });
+  const compareAt = compareRaw ? parseBRLInput(compareRaw) : null;
+  if (compareRaw && compareAt === null) throw new FormError("Preço original inválido. Exemplo: 20,00");
+  if (compareAt !== null && compareAt <= price) {
+    throw new FormError("O preço original (de) precisa ser maior que o preço cobrado.");
+  }
   return {
     category_id: text(fd, "category_id", { required: true, label: "Categoria" }),
     name: text(fd, "name", { required: true, max: 80, label: "Nome" }),
     description: text(fd, "description", { max: 200, label: "Descrição" }),
     price_cents: price,
+    compare_at_cents: compareAt,
     position: int(fd, "position", { min: 0, max: 999, fallback: 0, label: "Ordem" }),
   };
 }
